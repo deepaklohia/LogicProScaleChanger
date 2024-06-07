@@ -1,0 +1,46 @@
+/* Scale changers ver 1.2.5 Dated 10-Jul-2023 
+ Designed by Deepak Lohia  https://www.dlohia.com */   function HandleMIDI(event) {               var pRootNote = GetParameter('Root Note'); 	var pScale = GetParameter('Scale') ;  	var pTranspose = GetParameter('Transpose') ;  	var pOctave = GetParameter('Octave') ;      	if (pRootNote > 0){/* if note is not none*/ 		var pitchAdj = getScaleFrame(event, pRootNote, pScale ); /*Root Note integer , Scale as integer*/ 		if (pitchAdj != "m") {
+			event.pitch = event.pitch + pitchAdj ; 			if (pTranspose != 0){ event.pitch = event.pitch + pTranspose ;} 			if (pOctave !=0){event.pitch = event.pitch + (pOctave * 12) ;} 			event.send();  		} 	} 	else	{ 		event.send(); 	}
+			
+	Trace(event.toString());
+ }   function displayNoteInfo(e){
+	var pitch = e.pitch;
+	var oct = 0 ;
+	
+	var noteFrame = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B", "C", "C#" ];
+	
+	//0 Pitch is C
+	if (pitch < 0){ pitch += 12 ;}
+	else if (pitch <= 11){ oct = 1; }
+	else if (pitch <= 23){ pitch -= 12 ; oct = 2; }
+	else if (pitch <= 35){ pitch -= 24 ; oct = 3; }
+	else if (pitch <= 47){ pitch -= 36 ; oct = 4; }
+	else if (pitch <= 59){ pitch -= 48 ; oct = 5; }
+	else if (pitch <= 71){ pitch -= 60 ; oct = 6; }
+	else if (pitch <= 83){ pitch -= 72 ; oct = 7; }
+	else if (pitch <= 95){ pitch -= 84 ; oct = 8; }
+	else if (pitch <= 107){ pitch -= 96 ; oct = 9; }
+	else if (pitch <= 119){ pitch -= 108 ; oct = 10; }
+	else if (pitch <= 131){ pitch -= 120 ; oct = 11; }
+	
+	var noteInfo = noteFrame[pitch];
+	Trace (pitch + ">>" + noteInfo + oct );
+}
+			
+			 function getScaleFrame(event, pRootNote , pScale ){ 	pRootNote = pRootNote - 1 ;    	if (pScale == 0){      /*Major*/ 		var scFrame = [/*SA*/ pRootNote , /*RE*/pRootNote , /*GA*/  pRootNote, /*MA*/pRootNote , /*PA*/ pRootNote , /*DHA*/  pRootNote, /*NI*/  pRootNote ]; 	} 	else if (pScale == 1){        /*MipRootNoteor*/ 		var scFrame = [/*SA*/ pRootNote , /*RE*/pRootNote , /*GA*/ pRootNote-1, /*MA*/pRootNote , /*PA*/ pRootNote , /*DHA*/ pRootNote-1, /*NI*/ pRootNote-1 ]; 	} 	else if (pScale == 2){        /*Bharavi */ 		var scFrame =[/*SA*/ pRootNote , /*RE*/pRootNote -1 , /*GA*/ pRootNote-1, /*MA*/pRootNote , /*PA*/ pRootNote , /*DHA*/  pRootNote - 1 , /*NI*/ pRootNote-1 ] ; 	} 	else if (pScale == 3){        /*DoriapRootNote*/ 		var scFrame =[/*SA*/ pRootNote , /*RE*/pRootNote , /*GA*/ pRootNote-1, /*MA*/pRootNote , /*PA*/ pRootNote , /*DHA*/  pRootNote, /*NI*/ pRootNote-1, ] ; 	} 	else if (pScale == 4){        /*PepRootNotetatopRootNoteic major (5-5)  bhoopali (KalyapRootNote thaat) MA ApRootNoteD pRootNoteI pRootNoteIDESH*/ 		var scFrame =[/*SA*/ pRootNote , /*RE*/pRootNote , /*GA*/ pRootNote, /*PA*/ pRootNote+2 , /*DHA*/ pRootNote+2 , /*SA*/  pRootNote+3, /*RE*/ pRootNote +3 ] ; 	}
+
+	else if (pScale == 5){   /*Mixlodian -Ni Komal Khamaaj Thaat */ 		var scFrame = [/*SA*/ pRootNote , /*RE*/pRootNote , /*GA*/  pRootNote, /*MA*/pRootNote , /*PA*/ pRootNote , /*DHA*/  pRootNote, /*NI*/  pRootNote - 1 ]; 	}
+	 	else if (pScale == 6){  /*ALL NOTES ROW*/
+		pRootNote = 0; /*override toot note*/ 		var scFrame = [/*SA*/ pRootNote , /*RE*/pRootNote-1 , /*GA*/  pRootNote-2, /*MA*/pRootNote -2 , /*PA*/ pRootNote-3 , /*DHA*/  pRootNote-4, /*NI*/  pRootNote-5]; 	} 	else if (pScale == 7){        /*ALL IpRootNote ROW*/ 		var scFrame = [/*SA*/ pRootNote , /*RE*/pRootNote-1 , /*GA*/  pRootNote-2, /*MA*/pRootNote -2 , /*PA*/ pRootNote-3 , /*DHA*/  pRootNote-4, /*NI*/  pRootNote-5,  	 /*SA2*/ pRootNote-5 , /*RE2*/pRootNote-6 , /*GA2*/  pRootNote-7, /*MA2*/ pRootNote-7 ]; 	} 	else{ 		Trace ("Invalid Thaat / Raag") ; 	}   	var notePosition = getNotePitch(event,pScale) ; 	return  scFrame[notePosition]; }   function getNotePitch(event, pScale){ 	var str =  event.toString(); 	var nPitch = 0 ; 
+		 	var strNote = str.split("[")[2]; 	strNote = strNote.split("]")[0];   	if (pScale == 6) { 		strNote = strNote.substring(0,2) ; 	}else{ 		strNote = strNote.substring(0,1) ; 	}  	
+ 	//Trace(strNote);
+ 	
+ 	strNote = strNote.replace("-","");//if the note is in minus
+ 	
+	var noteFrame = ["C1", "D1", "E1", "F1", "G1", "A1", "B1", "C2", "D2", "E2", "F2", "G2", "A2", "B2", "C3", "D3", "E3", "F3", "G3", "A3", "B3" ]; 	if ( strNote.length == 1){strNote	= strNote + "1" ;} /* C -- B */
+	nPitch = noteFrame.indexOf(strNote); 
+	if (nPitch <= -1){Trace (strNote + ":Invalid Note found");}
+	 	return nPitch; }   /*UI */ var note = ['None', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#','B']; //var scale = ['Major-Bilawal thaat', 'Minor-Asawari thaat','Phrygian-Bhairavi', 'Dorian-Thaat kafi', 'Pentatonic major-bhoopali', 'All','Sample Mapping'];
+/* 0, 1, 2, 3 .. */
+var scale = ['Major-Bilawal thaat', 'Minor [ga,dha,ni]-Asawari thaat','Phrygian[re,ga,dha,ni]-Bhairavi', 'Dorian-[ga,ni]Thaat kafi', 'Pentatonic major-bhoopali[5-5]-Kalyan thaat', 'Mixlodian [ni]-Khamaaj Thaat', 'All Notes','Sample Mapping'];   /* parameter definitions*/ var PluginParameters = [ {name:'Root Note', type:'menu', valueStrings:note,defaultValue:1, numberOfSteps: 13}, {name:'Scale', type:'menu', valueStrings:scale,defaultValue:0, numberOfSteps: 10}, {name:"Transpose", type:"linear", minValue:0, maxValue:24,defaultValue:0, numberOfSteps:24}, {name:"Octave", type:"linear", minValue:0, maxValue:8,defaultValue:0, numberOfSteps:8} ];   
+
